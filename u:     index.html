@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07111d">
+<title>ALEX – KI-Assistent</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #050b13;
+  --line: #163c50;
+  --cyan: #52e7ff;
+  --text: #e8f8ff;
+  --muted: #8eabbc;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 0%, #10283b 0, #050b13 56%);
+  color: var(--text);
+  font: 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+.wrap { max-width: 850px; margin: auto; padding: 22px 16px 30px; }
+.top { text-align: center; padding: 12px 0 20px; }
+.eyebrow { letter-spacing: .28em; color: var(--cyan); font-size: 11px; }
+.orb {
+  width: 112px; height: 112px; margin: 16px auto;
+  border: 1px solid #55eaff; border-radius: 50%;
+  display: grid; place-items: center;
+  box-shadow: 0 0 18px #00c8ff55, inset 0 0 25px #00c8ff22;
+  position: relative;
+}
+.orb:before, .orb:after {
+  content: ""; position: absolute; border: 1px solid #43dfff77;
+  border-radius: 50%; inset: 8px;
+}
+.orb:after { inset: -7px; border-style: dashed; animation: spin 22s linear infinite; }
+.orb span { font-size: 35px; color: var(--cyan); }
+.orb.speaking { animation: pulse 1.1s infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { box-shadow: 0 0 36px #00c8ff99; } }
+h1 { font-size: 34px; letter-spacing: .2em; margin: 0; }
+.sub, .hint { color: var(--muted); }
+.sub { font-size: 13px; margin-top: 8px; }
+.status {
+  display: inline-flex; gap: 8px; align-items: center;
+  border: 1px solid var(--line); border-radius: 99px;
+  padding: 7px 12px; color: #9cefff; font-size: 12px; margin-top: 15px;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #49efb2; }
+.card {
+  background: #081522d9; border: 1px solid var(--line);
+  border-radius: 18px; padding: 16px; margin: 12px 0;
+}
+.section { color: var(--cyan); font-size: 11px; letter-spacing: .16em; margin-bottom: 10px; }
+.messages {
+  height: min(38vh, 350px); min-height: 190px; overflow: auto;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.msg {
+  padding: 11px 13px; border-radius: 14px; max-width: 90%;
+  white-space: pre-wrap; line-height: 1.45; overflow-wrap: anywhere;
+}
+.alex { align-self: flex-start; background: #102a3a; border: 1px solid #1c5367; }
+.you { align-self: flex-end; background: #123e51; border: 1px solid #22738a; }
+.msg small { display: block; color: #9cc7d7; font-size: 10px; margin-bottom: 5px; }
+.composer { display: flex; gap: 8px; margin-top: 12px; }
+textarea {
+  flex: 1; min-height: 48px; border: 1px solid #225267;
+  background: #050e18; color: var(--text); border-radius: 12px;
+  padding: 13px; font: inherit;
+}
+.btn {
+  border: 1px solid #2b7890; border-radius: 12px;
+  background: #0e3446; color: var(--text); padding: 11px 14px;
+  font: inherit; cursor: pointer;
+}
+.primary { background: linear-gradient(135deg, #0c728c, #12415d); border-color: var(--cyan); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.row .btn { flex: 1; min-width: 120px; }
+.hint { font-size: 12px; line-height: 1.5; }
+footer { text-align: center; color: #638194; font-size: 11px; padding: 18px 0; }
+@media(max-width:520px) {
+  .wrap { padding: 14px 10px 24px; }
+  h1 { font-size: 29px; }
+  .composer { flex-wrap: wrap; }
+  textarea { flex-basis: 100%; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top">
+  <div class="eyebrow">PERSONAL AI SYSTEM</div>
+  <div class="orb" id="orb"><span>✦</span></div>
+  <h1>ALEX</h1>
+  <div class="sub">Dein persönlicher KI-Assistent</div>
+  <div class="status"><span class="dot"></span><span>BEREIT</span></div>
+</header>
+
+<section class="card">
+  <div class="section">DEIN CHAT MIT ALEX</div>
+  <div class="messages" id="messages">
+    <div class="msg alex"><small>ALEX</small>
+      Hallo! Ich bin ALEX. Tippe auf „ChatGPT starten“, um mit der KI zu sprechen.
+    </div>
+  </div>
+  <div class="composer">
+    <textarea id="input" placeholder="Schreib ALEX eine Nachricht …"></textarea>
+    <button class="btn primary" id="send">Senden</button>
+  </div>
+  <div class="row">
+    <button class="btn" id="voice">🎙️ Spracheingabe</button>
+    <button class="btn" id="speak">🔊 Antwort vorlesen</button>
+    <button class="btn primary" id="chatgpt">💬 ChatGPT starten</button>
+  </div>
+  <p class="hint">
+    ChatGPT öffnet sich separat. Diese Seite ist nicht direkt mit deinem ChatGPT-Konto verbunden.
+  </p>
+</section>
+
+<section class="card">
+  <div class="section">SCHNELLZUGRIFF</div>
+  <div class="row">
+    <button class="btn" id="alexa">🏠 Alexa öffnen</button>
+  </div>
+  <p class="hint">Alexa wird separat geöffnet. Eine direkte Smart-Home-Steuerung ist noch nicht integriert.</p>
+</section>
+
+<footer>ALEX · Persönlicher KI-Assistent</footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let lastReply = "Tippe auf ChatGPT starten, um mit der KI zu sprechen.";
+
+function addMessage(text, who) {
+  const box = document.createElement("div");
+  box.className = "msg " + who;
+  const label = document.createElement("small");
+  label.textContent = who === "you" ? "DU" : "ALEX";
+  box.append(label, document.createTextNode(text));
+  $("messages").appendChild(box);
+  $("messages").scrollTop = $("messages").scrollHeight;
+}
+
+$("send").addEventListener("click", () => {
+  const text = $("input").value.trim();
+  if (!text) return;
+  addMessage(text, "you");
+  $("input").value = "";
+  lastReply = "Für eine echte KI-Antwort tippe bitte auf „ChatGPT starten“. Diese Demo ist nicht direkt verbunden.";
+  addMessage(lastReply, "alex");
+});
+
+$("input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    $("send").click();
+  }
+});
+
+$("chatgpt").addEventListener("click", () => {
+  window.location.href = "https://chatgpt.com/";
+});
+
+$("alexa").addEventListener("click", () => {
+  window.location.href = "https://alexa.amazon.com/";
+});
+
+$("speak").addEventListener("click", () => {
+  if (!("speechSynthesis" in window)) {
+    alert("Vorlesen wird in diesem Browser nicht unterstützt.");
+    return;
+  }
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(lastReply);
+  utterance.lang = "de-DE";
+  utterance.rate = 0.92;
+  $("orb").classList.add("speaking");
+  utterance.onend = () => $("orb").classList.remove("speaking");
+  speechSynthesis.speak(utterance);
+});
+
+$("voice").addEventListener("click", () => {
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    alert("Spracheingabe wird hier nicht unterstützt. Verwende die Mikrofontaste deiner iPad-Tastatur.");
+    return;
+  }
+  const recognition = new Recognition();
+  recognition.lang = "de-DE";
+  recognition.onresult = event => {
+    $("input").value = event.results[0][0].transcript;
+  };
+  recognition.start();
+});
+</script>
+</body>
+</html>
